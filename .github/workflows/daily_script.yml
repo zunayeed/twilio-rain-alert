@@ -1,1 +1,35 @@
+name: Run Daily Python Script
 
+on:
+  schedule:
+    # Triggers the workflow every day at 12:00 PM UTC (Adjust as needed)
+    - cron: '0 12 * * *'
+  workflow_dispatch: # Allows you to manually trigger the script from the Actions tab
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Run Python script with Secrets
+      env:
+        # Maps your GitHub Repository Secrets directly to your environment variables
+        OWM_API_KEY: ${{ secrets.OWM_API_KEY }}
+        TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+        TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
+        TWILIO_SID: ${{ secrets.TWILIO_SID }}
+        TWILIO_TO: ${{ secrets.TWILIO_TO }}
+      run: python main.py
